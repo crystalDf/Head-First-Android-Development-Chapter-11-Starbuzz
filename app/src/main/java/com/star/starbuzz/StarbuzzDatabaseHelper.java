@@ -17,12 +17,16 @@ public class StarbuzzDatabaseHelper extends SQLiteOpenHelper {
     private static final String COLUMN_NAME = "NAME";
     private static final String COLUMN_DESCRIPTION = "DESCRIPTION";
     private static final String COLUMN_IMAGE_RESOURCE_ID = "IMAGE_RESOURCE_ID";
+    private static final String COLUMN_FAVORITE = "FAVORITE";
 
     private static final String CREATE_TABLE_DRINK = "CREATE TABLE " + TABLE_DRINK + "(" +
             COLUMN_ID + "INTEGER PRIMARY KEY AUTOINCREMENT, " +
             COLUMN_NAME + "TEXT, " +
             COLUMN_DESCRIPTION + "TEXT, " +
             COLUMN_IMAGE_RESOURCE_ID + "INTEGER" + ");";
+
+    private static final String ALTER_TABLE_DRINK = "ALTER TABLE " + TABLE_DRINK +
+            "ADD COLUMN " + COLUMN_FAVORITE + "NUMERIC;";
 
 
     public StarbuzzDatabaseHelper(Context context) {
@@ -31,17 +35,29 @@ public class StarbuzzDatabaseHelper extends SQLiteOpenHelper {
 
     @Override
     public void onCreate(SQLiteDatabase db) {
-        db.execSQL(CREATE_TABLE_DRINK);
 
-        insertDrink(db, "Latte", "Espresso and steamed milk", R.drawable.latte);
-        insertDrink(db, "Cappuccino", "Espresso, hot milk and steamed-milk foam",
-                R.drawable.cappuccino);
-        insertDrink(db, "Filter", "Our best drip coffee", R.drawable.filter);
+        updateDatabase(db, 0, DB_VERSION);
     }
 
     @Override
     public void onUpgrade(SQLiteDatabase db, int oldVersion, int newVersion) {
 
+        updateDatabase(db, oldVersion, newVersion);
+    }
+
+    private void updateDatabase(SQLiteDatabase db, int oldVersion, int newVersion) {
+        if (oldVersion < 1) {
+            db.execSQL(CREATE_TABLE_DRINK);
+
+            insertDrink(db, "Latte", "Espresso and steamed milk", R.drawable.latte);
+            insertDrink(db, "Cappuccino", "Espresso, hot milk and steamed-milk foam",
+                    R.drawable.cappuccino);
+            insertDrink(db, "Filter", "Our best drip coffee", R.drawable.filter);
+        }
+
+        if (oldVersion < 2) {
+            db.execSQL(ALTER_TABLE_DRINK);
+        }
     }
 
     private static void insertDrink(SQLiteDatabase db, String name,
